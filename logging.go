@@ -14,6 +14,9 @@ var (
 	warnLogger  *log.Logger
 	errorLogger *log.Logger
 	fatalLogger *log.Logger
+
+	// Suppress output if external-caller tests are being run
+	isTesting bool
 )
 
 func init() {
@@ -25,27 +28,48 @@ func init() {
 	warnLogger = log.New(os.Stderr, "[ WARN  ] ", log.Ldate|log.Ltime)
 	errorLogger = log.New(os.Stderr, "[ ERROR ] ", log.Ldate|log.Ltime)
 	fatalLogger = log.New(os.Stderr, "[ FATAL ] ", log.Ldate|log.Ltime)
-}
 
-func DebugLog(msg string, values ...any) {
-	debugLogger.Printf(msg+"\n", values...)
-}
-
-func InfoLog(msg string, values ...any) {
-	infoLogger.Printf(msg+"\n", values...)
-}
-
-func WarnLog(msg string, values ...any) {
-	warnLogger.Printf(msg+"\n", values...)
-}
-
-func ErrorLog(err error, msg string, values ...any) {
-	if err != nil {
-		errorLogger.Println(err.Error())
+	if os.Getenv("OSC_IS_TESTING") == "true" {
+		isTesting = true
+	} else {
+		isTesting = false
 	}
-	errorLogger.Printf(msg+"\n", values...)
 }
 
+// DebugLog throws debug log messages
+func DebugLog(msg string, values ...any) {
+	if !isTesting {
+		debugLogger.Printf(msg+"\n", values...)
+	}
+}
+
+// InfoLog throws info log messages
+func InfoLog(msg string, values ...any) {
+	if !isTesting {
+		infoLogger.Printf(msg+"\n", values...)
+	}
+}
+
+// WarnLog throws warning log messages
+func WarnLog(msg string, values ...any) {
+	if !isTesting {
+		warnLogger.Printf(msg+"\n", values...)
+	}
+}
+
+// ErrorLog throws error log messages
+func ErrorLog(err error, msg string, values ...any) {
+	if !isTesting {
+		if err != nil {
+			errorLogger.Println(err.Error())
+		}
+		errorLogger.Printf(msg+"\n", values...)
+	}
+}
+
+// FatalLog throws fatal log messages, which includes an exit call. There is no
+// check here for if external tests are being run, so that callers can still see
+// fatal log messages.
 func FatalLog(err error, msg string, values ...any) {
 	if err != nil {
 		fatalLogger.Println(err.Error())

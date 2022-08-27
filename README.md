@@ -9,3 +9,10 @@ Common Go library for OpenSourceCorp
 
 This repository houses common functionality to be used across Go packages
 authored by OpenSourceCorp.
+
+Suppressing log messages in your own program's tests
+----------------------------------------------------
+
+If you want or need to suppress log messages from this repo's `logging` package,
+set the env var `OSC_IS_TESTING=true` for your test runs. This will suppress all
+but `logging.FatalLog()` messages.
