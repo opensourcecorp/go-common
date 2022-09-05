@@ -13,11 +13,11 @@ func readTestLogs(b bytes.Buffer) string {
 // TestLogging tests each of the loggers. Since logs contain timestamps, want
 // vs. got comparisons are done based on regexp vs. exact matches
 func TestLogging(t *testing.T) {
-	// We need to override `isTesting` in this logging test block, because if
+	// We need to override `IsTesting` in this logging test block, because if
 	// it's true, logs won't emit anything, and we need them to emit to the
 	// buffers! So, that's why you see that happening, with a reset at the very
 	// end
-	isTesting = false
+	IsTesting = false
 
 	var (
 		want, got                                      string
@@ -27,8 +27,8 @@ func TestLogging(t *testing.T) {
 	)
 
 	t.Run("DebugLog", func(t *testing.T) {
-		debugLogger.SetOutput(&debugBuf)
-		want = `[ osc:DEBUG ].* debug`
+		DebugLogger.SetOutput(&debugBuf)
+		want = `\[ osc:DEBUG \].* debug`
 		DebugLog("debug")
 		got = readTestLogs(debugBuf)
 
@@ -42,8 +42,8 @@ func TestLogging(t *testing.T) {
 	})
 
 	t.Run("InfoLog", func(t *testing.T) {
-		infoLogger.SetOutput(&infoBuf)
-		want = `[ osc:INFO  ].* info`
+		InfoLogger.SetOutput(&infoBuf)
+		want = `\[ osc:INFO  \].* info`
 		InfoLog("info")
 		got = readTestLogs(infoBuf)
 
@@ -57,8 +57,8 @@ func TestLogging(t *testing.T) {
 	})
 
 	t.Run("WarnLog", func(t *testing.T) {
-		warnLogger.SetOutput(&warnBuf)
-		want = `[ osc:WARN  ].* warn`
+		WarnLogger.SetOutput(&warnBuf)
+		want = `\[ osc:WARN  \].* warn`
 		WarnLog("warn")
 		got = readTestLogs(warnBuf)
 
@@ -72,8 +72,8 @@ func TestLogging(t *testing.T) {
 	})
 
 	t.Run("ErrorLog", func(t *testing.T) {
-		errorLogger.SetOutput(&errorBuf)
-		want = `[ osc:ERROR ].* error`
+		ErrorLogger.SetOutput(&errorBuf)
+		want = `\[ osc:ERROR \].* error`
 		ErrorLog(nil, "error")
 		got = readTestLogs(errorBuf)
 
@@ -87,12 +87,12 @@ func TestLogging(t *testing.T) {
 	})
 
 	t.Run("FatalLog", func(t *testing.T) {
-		// For FatalLog, we actually need to RE-enable the isTesting var,
+		// For FatalLog, we actually need to RE-enable the IsTesting var,
 		// because FatalLog will always produce output regardless of testing
 		// status BUT will throw an os.Exit() unless testing is enabled
-		isTesting = true
-		fatalLogger.SetOutput(&fatalBuf)
-		want = `[ osc:FATAL ].* fatal`
+		IsTesting = true
+		FatalLogger.SetOutput(&fatalBuf)
+		want = `\[ osc:FATAL \].* fatal`
 		FatalLog(nil, "fatal")
 		got = readTestLogs(fatalBuf)
 
@@ -106,5 +106,5 @@ func TestLogging(t *testing.T) {
 	})
 
 	// And here's the final reset
-	isTesting = true
+	IsTesting = true
 }
