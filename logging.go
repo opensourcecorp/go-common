@@ -75,5 +75,7 @@ func FatalLog(err error, msg string, values ...any) {
 		fatalLogger.Println(err.Error())
 	}
 	fatalLogger.Printf(msg+"\n", values...)
-	os.Exit(1)
+	if !isTesting {
+		os.Exit(1)
+	}
 }
