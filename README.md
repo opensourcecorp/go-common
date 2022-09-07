@@ -13,6 +13,10 @@ authored by OpenSourceCorp.
 Suppressing log messages in your own program's tests
 ----------------------------------------------------
 
-If you want or need to suppress log messages from this repo's `logging` package,
-set the env var `OSC_IS_TESTING=true` for your test runs. This will suppress all
-but `logging.FatalLog()` messages.
+If you want or need to suppress log messages from this package's logging
+facilities, set the env var `OSC_IS_TESTING=true` for your test runs. This will
+suppress all but `FatalLog()` messages.
+
+If you need to trick the loggers into thinking you're *not* testing for some
+reason, you can temporarily set `osc.IsTesting = false` during any test run, and
+then re-set it to `true`.

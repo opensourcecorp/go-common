@@ -3,6 +3,7 @@ package osc
 import (
 	"os/exec"
 	"regexp"
+	"strings"
 )
 
 // Syscall contains data necessary to build, run, and validate external calls.
@@ -11,11 +12,14 @@ import (
 // have CmdLine defined.
 type Syscall struct {
 	CmdLine                 []string // The actual command and its args to pass to Exec()
-	ErrCheckType            string   // what kind of logical check to make against Exec() returns
-	OutputErrorPatternMatch string   // used to match against, if matching against a pattern in the Exec() output
-	Ok                      bool     // was Exec() successful based on conditions?
+	ErrCheckType            string   // What kind of logical check to make against Exec() returns
+	OutputErrorPatternMatch string   // Used to match against Exec() output to throw an error
+	Ok                      bool     // Was Exec() successful based on conditions?
+	Output                  string   // Used to surface Exec() combined stdout/stderr to the caller, in case it needs to look at it
 }
 
+// Exec invokes the command & arguments as specified by Syscall.CmdLine. It then
+// collects some useful information for the caller to check or inspect against.
 func (sc *Syscall) Exec() {
 	var cmd *exec.Cmd
 	if len(sc.CmdLine) == 1 {
@@ -28,15 +32,16 @@ func (sc *Syscall) Exec() {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		ErrorLog(err, "Output below:\n"+string(output))
+		ErrorLog(err, "Exec() error, output below:\n"+string(output))
 		sc.Ok = false
 		return
 	}
+	sc.Output = strings.TrimSpace(string(output))
 
 	switch sc.ErrCheckType {
 	case "nonZeroExit", "":
-		// this should have failed early above, so we can just return true early
-		// here
+		// This should have failed early above, but if somehow we get here
+		// anyway, we can just return after setting a success status here
 		sc.Ok = true
 		return
 	case "outputGTZero":
@@ -56,7 +61,7 @@ func (sc *Syscall) Exec() {
 		}
 	default:
 		// If it was a nonzero exit syscall, they should never get here anyway
-		FatalLog(nil, "Unhandled syscall() errCheckType '%s'", sc.ErrCheckType)
+		FatalLog(nil, "Unhandled Syscall.ErrCheckType '%s'", sc.ErrCheckType)
 	}
 
 	sc.Ok = true
