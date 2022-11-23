@@ -1,6 +1,9 @@
 package osc
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestDedent(t *testing.T) {
 	t.Run("dedent a source-indented string", func(t *testing.T) {
@@ -66,4 +69,36 @@ func TestCountLeadingWhitespace(t *testing.T) {
 			t.Errorf("want: %d, got: %d", want, got)
 		}
 	})
+}
+
+// Examples
+
+// Dedent is most helpful when writing embedded multiline strings, that
+// typically you would need to align fully to the first column of your file.
+// Using Dedent allows for indenting for easier readability without the ugly
+// break in visual scans.
+func ExampleDedent() {
+	theUglyWayYouUsuallyHaveToDoIt := `---
+some: yaml_frontmatter
+---
+key1:
+	key1a: value
+	key2a:
+		key2aa: value
+key2: value`
+
+	indentedString := `
+		---
+		some: yaml_frontmatter
+		---
+		key1:
+			key1a: value
+			key2a:
+				key2aa: value
+		key2: value
+	`
+	dedentedString := Dedent(indentedString)
+
+	fmt.Println(dedentedString == theUglyWayYouUsuallyHaveToDoIt)
+	// Output: true
 }

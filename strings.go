@@ -6,25 +6,14 @@ import (
 )
 
 /*
-Dedent takes a string `s` and returns the same string with all leading
-whitespace characters removed, with a maximum of the smallest count of the
-characters.
+Dedent takes a string and returns the same string with all leading whitespace
+characters removed, with a maximum of the smallest count of those characters. It
+is very similar to Python's [textwrap.dedent()]. Dedent also removes any newline-only lines
 
-For example, the string:
+Note that this implementation currently depends on the line separator being LF
+(\n).
 
-	abc
-		easy as
-			one two three
-
-would be returned as:
-
-	abc
-		easy as
-			one two three
-
-which is dedented by two tab characters (the smallest amount discovered).
-
-Note that this implementation depends on the line separator being LF (`\n`).
+[textwrap.dedent()]: https://docs.python.org/3/library/textwrap.html#textwrap.dedent
 */
 func Dedent(s string) string {
 	lines := strings.Split(s, "\n")
@@ -41,6 +30,13 @@ func Dedent(s string) string {
 		// check here since this is the first loop we run in this func
 		if !leadingWSRegex.MatchString(line) && line != "" {
 			return s
+		}
+
+		// We also don't want to process whitespace-only lines, because e.g. the
+		// final input line may be arbitrarily indented in the raw input, which
+		// might not be the dedentation we actually want
+		if onlyWSRegex.MatchString(line) {
+			continue
 		}
 
 		reps := countLeadingWhitespace(line)
