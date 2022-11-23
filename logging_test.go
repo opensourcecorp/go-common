@@ -17,17 +17,22 @@ func TestLogging(t *testing.T) {
 	IsTesting = false
 
 	var (
-		want, got                                      string
-		match                                          bool
-		err                                            error
-		debugBuf, infoBuf, warnBuf, errorBuf, fatalBuf bytes.Buffer
+		want, got string
+		match     bool
+		err       error
+		debugBuf  bytes.Buffer
+		infoBuf   bytes.Buffer
+		warnBuf   bytes.Buffer
+		errorBuf  bytes.Buffer
+		fatalBuf  bytes.Buffer
 	)
 
 	type testTableItem struct {
-		logger   *log.Logger
-		want     string
-		buffer   bytes.Buffer
-		funcName func(error, string, ...any)
+		logger      *log.Logger
+		want        string
+		buffer      bytes.Buffer
+		funcName    func(string, ...any)
+		errFuncName func(error, string, ...any)
 	}
 
 	testTable := map[string]testTableItem{
@@ -50,16 +55,16 @@ func TestLogging(t *testing.T) {
 			funcName: WarnLog,
 		},
 		"ErrorLog": {
-			logger:   ErrorLogger,
-			want:     `\[ osc:ERROR \].* ErrorLog`,
-			buffer:   errorBuf,
-			funcName: ErrorLog,
+			logger:      ErrorLogger,
+			want:        `\[ osc:ERROR \].* ErrorLog`,
+			buffer:      errorBuf,
+			errFuncName: ErrorLog,
 		},
 		"FatalLog": {
-			logger:   FatalLogger,
-			want:     `\[ osc:FATAL \].* FatalLog`,
-			buffer:   fatalBuf,
-			funcName: FatalLog,
+			logger:      FatalLogger,
+			want:        `\[ osc:FATAL \].* FatalLog`,
+			buffer:      fatalBuf,
+			errFuncName: FatalLog,
 		},
 	}
 
@@ -74,7 +79,14 @@ func TestLogging(t *testing.T) {
 
 			v.logger.SetOutput(&v.buffer)
 			want = v.want
-			v.funcName(nil, k)
+
+			// Need to dispatch based on signature, since some logs don't share the same
+			if k == "ErrorLog" || k == "FatalLog" {
+				v.errFuncName(nil, k)
+			} else {
+				v.funcName(k)
+			}
+
 			got = v.buffer.String()
 
 			if k == "FatalLog" {
