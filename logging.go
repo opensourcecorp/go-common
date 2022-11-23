@@ -57,21 +57,21 @@ func SetLoggerPrefixName(name string) {
 }
 
 // DebugLog throws debug log messages
-func DebugLog(msg string, values ...any) {
+func DebugLog(_ error, msg string, values ...any) {
 	if !IsTesting {
 		DebugLogger.Printf(msg+"\n", values...)
 	}
 }
 
 // InfoLog throws info log messages
-func InfoLog(msg string, values ...any) {
+func InfoLog(_ error, msg string, values ...any) {
 	if !IsTesting {
 		InfoLogger.Printf(msg+"\n", values...)
 	}
 }
 
 // WarnLog throws warning log messages
-func WarnLog(msg string, values ...any) {
+func WarnLog(_ error, msg string, values ...any) {
 	if !IsTesting {
 		WarnLogger.Printf(msg+"\n", values...)
 	}

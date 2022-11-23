@@ -2,13 +2,10 @@ package osc
 
 import (
 	"bytes"
+	"log"
 	"regexp"
 	"testing"
 )
-
-func readTestLogs(b bytes.Buffer) string {
-	return b.String()
-}
 
 // TestLogging tests each of the loggers. Since logs contain timestamps, want
 // vs. got comparisons are done based on regexp vs. exact matches
@@ -26,84 +23,73 @@ func TestLogging(t *testing.T) {
 		debugBuf, infoBuf, warnBuf, errorBuf, fatalBuf bytes.Buffer
 	)
 
-	t.Run("DebugLog", func(t *testing.T) {
-		DebugLogger.SetOutput(&debugBuf)
-		want = `\[ osc:DEBUG \].* debug`
-		DebugLog("debug")
-		got = readTestLogs(debugBuf)
+	type testTableItem struct {
+		logger   *log.Logger
+		want     string
+		buffer   bytes.Buffer
+		funcName func(error, string, ...any)
+	}
 
-		match, err = regexp.MatchString(want, got)
-		if err != nil {
-			t.Fatalf(err.Error())
-		}
-		if !match {
-			t.Errorf("Desired log pattern '%v' does not match log content '%v'\n", want, got)
-		}
-	})
+	testTable := map[string]testTableItem{
+		"DebugLog": {
+			logger:   DebugLogger,
+			want:     `\[ osc:DEBUG \].* DebugLog`,
+			buffer:   debugBuf,
+			funcName: DebugLog,
+		},
+		"InfoLog": {
+			logger:   InfoLogger,
+			want:     `\[ osc:INFO  \].* InfoLog`,
+			buffer:   infoBuf,
+			funcName: InfoLog,
+		},
+		"WarnLog": {
+			logger:   WarnLogger,
+			want:     `\[ osc:WARN  \].* WarnLog`,
+			buffer:   warnBuf,
+			funcName: WarnLog,
+		},
+		"ErrorLog": {
+			logger:   ErrorLogger,
+			want:     `\[ osc:ERROR \].* ErrorLog`,
+			buffer:   errorBuf,
+			funcName: ErrorLog,
+		},
+		"FatalLog": {
+			logger:   FatalLogger,
+			want:     `\[ osc:FATAL \].* FatalLog`,
+			buffer:   fatalBuf,
+			funcName: FatalLog,
+		},
+	}
 
-	t.Run("InfoLog", func(t *testing.T) {
-		InfoLogger.SetOutput(&infoBuf)
-		want = `\[ osc:INFO  \].* info`
-		InfoLog("info")
-		got = readTestLogs(infoBuf)
+	for k, v := range testTable {
+		t.Run(k, func(t *testing.T) {
+			// For FatalLog, we actually need to RE-enable the IsTesting var,
+			// because FatalLog will always produce output regardless of testing
+			// status BUT will throw an os.Exit() unless testing is enabled
+			if k == "FatalLog" {
+				IsTesting = true
+			}
 
-		match, err = regexp.MatchString(want, got)
-		if err != nil {
-			t.Fatalf(err.Error())
-		}
-		if !match {
-			t.Errorf("Desired log pattern '%v' does not match log content '%v'\n", want, got)
-		}
-	})
+			v.logger.SetOutput(&v.buffer)
+			want = v.want
+			v.funcName(nil, k)
+			got = v.buffer.String()
 
-	t.Run("WarnLog", func(t *testing.T) {
-		WarnLogger.SetOutput(&warnBuf)
-		want = `\[ osc:WARN  \].* warn`
-		WarnLog("warn")
-		got = readTestLogs(warnBuf)
+			if k == "FatalLog" {
+				IsTesting = false
+			}
 
-		match, err = regexp.MatchString(want, got)
-		if err != nil {
-			t.Fatalf(err.Error())
-		}
-		if !match {
-			t.Errorf("Desired log pattern '%v' does not match log content '%v'\n", want, got)
-		}
-	})
-
-	t.Run("ErrorLog", func(t *testing.T) {
-		ErrorLogger.SetOutput(&errorBuf)
-		want = `\[ osc:ERROR \].* error`
-		ErrorLog(nil, "error")
-		got = readTestLogs(errorBuf)
-
-		match, err = regexp.MatchString(want, got)
-		if err != nil {
-			t.Fatalf(err.Error())
-		}
-		if !match {
-			t.Errorf("Desired log pattern '%v' does not match log content '%v'\n", want, got)
-		}
-	})
-
-	t.Run("FatalLog", func(t *testing.T) {
-		// For FatalLog, we actually need to RE-enable the IsTesting var,
-		// because FatalLog will always produce output regardless of testing
-		// status BUT will throw an os.Exit() unless testing is enabled
-		IsTesting = true
-		FatalLogger.SetOutput(&fatalBuf)
-		want = `\[ osc:FATAL \].* fatal`
-		FatalLog(nil, "fatal")
-		got = readTestLogs(fatalBuf)
-
-		match, err = regexp.MatchString(want, got)
-		if err != nil {
-			t.Fatalf(err.Error())
-		}
-		if !match {
-			t.Errorf("Desired log pattern '%v' does not match log content '%v'\n", want, got)
-		}
-	})
+			match, err = regexp.MatchString(want, got)
+			if err != nil {
+				t.Fatalf(err.Error())
+			}
+			if !match {
+				t.Errorf("Desired log pattern '%v' does not match log content '%v'\n", want, got)
+			}
+		})
+	}
 
 	// And here's the final reset
 	IsTesting = true
