@@ -8,10 +8,21 @@ import (
 /*
 Dedent takes a string and returns the same string with all leading whitespace
 characters removed, with a maximum of the smallest count of those characters. It
-is very similar to Python's [textwrap.dedent()]. Dedent also removes any newline-only lines
+is very similar to Python's [textwrap.dedent()]. Dedent also removes any
+newline-only lines.
 
-Note that this implementation currently depends on the line separator being LF
-(\n).
+For example, the following string (which I need to write this way because of
+godoc formatting):
+
+	\tabc\n\t\teasy as\n\t\t\tone two three
+
+would be returned as:
+
+	abc\t\neasy as\n\t\tone two three
+
+which is dedented by one tab character (the smallest amount discovered).
+
+Note that this implementation depends on the line separator being LF (`\n`).
 
 [textwrap.dedent()]: https://docs.python.org/3/library/textwrap.html#textwrap.dedent
 */
