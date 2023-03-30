@@ -10,19 +10,16 @@ Dedent takes a string `s` and returns the same string with all leading
 whitespace characters removed, with a maximum of the smallest count of the
 characters.
 
-For example, the string:
+For example, the following string (which I need to write this way because of
+godoc formatting):
 
-	abc
-		easy as
-			one two three
+	\tabc\n\t\teasy as\n\t\t\tone two three
 
 would be returned as:
 
-	abc
-		easy as
-			one two three
+	abc\t\neasy as\n\t\tone two three
 
-which is dedented by two tab characters (the smallest amount discovered).
+which is dedented by one tab character (the smallest amount discovered).
 
 Note that this implementation depends on the line separator being LF (`\n`).
 */
