@@ -1,14 +1,13 @@
-package osc
+package containertest
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/ory/dockertest"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func TestRunTestDockerContainer(t *testing.T) {
@@ -59,13 +58,16 @@ func TestRunTestDockerContainer(t *testing.T) {
 		addr := container.GetHostPort(runOpts.ExposedPorts[0])
 		t.Logf("addr: %s", addr)
 
+		ctx := context.Background()
+
 		err := pool.Retry(func() error {
-			db, err := sql.Open("pgx", fmt.Sprintf("postgres://test:test@%s/postgres", addr))
+			db, err := pgx.Connect(ctx, fmt.Sprintf("postgres://test:test@%s/postgres", addr))
 			if err != nil {
 				return fmt.Errorf("could not hit Postgres container: %v", err)
 			}
+			defer db.Close(ctx)
 
-			_, err = db.Exec(`CREATE TABLE IF NOT EXISTS test (id INTEGER);`)
+			_, err = db.Exec(ctx, `CREATE TABLE IF NOT EXISTS test (id INTEGER);`)
 			if err != nil {
 				return fmt.Errorf("could not hit Postgres container: %v", err)
 			}

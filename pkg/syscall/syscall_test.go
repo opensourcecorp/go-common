@@ -1,4 +1,4 @@
-package osc
+package syscall
 
 import (
 	"testing"

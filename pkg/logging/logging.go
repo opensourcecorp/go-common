@@ -1,4 +1,4 @@
-package osc
+package logging
 
 // logging provides consistent logging objects to cut down on copy-paste across
 // other packages within OpenSourceCorp

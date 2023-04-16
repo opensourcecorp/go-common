@@ -1,4 +1,4 @@
-package osc
+package strings
 
 import (
 	"regexp"

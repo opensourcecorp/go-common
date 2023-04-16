@@ -1,4 +1,4 @@
-package osc
+package logging
 
 import (
 	"bytes"

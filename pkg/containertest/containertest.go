@@ -1,4 +1,4 @@
-package osc
+package containertest
 
 import (
 	"testing"
@@ -8,20 +8,19 @@ import (
 )
 
 /*
-RunTestDockerContainer runs a Docker container to be used in tests. It returns
-the dockertest.Pool & dockertest.Container resources, and a deferrable function
-used to stop the started container. The container address can be retrieved from
-the container.GetHostPort() method, and if desired, a readiness probe func can
-be passed using the pool.Retry() method.
+RunTestDockerContainer (presently) runs a Docker container to be used in tests.
+It returns the dockertest.Pool & dockertest.Container resources, and a
+deferrable function used to stop the started container. The container address
+can be retrieved from the container.GetHostPort() method, and if desired, a
+readiness probe func can be passed using the pool.Retry() method.
 
 For examples of how to use this function, refer to its *own* tests, as they
 serve as the most basic & straightforward usage.
+
+In the future, this package is expected to support more than just Docker as a
+container runtime.
 */
-func RunTestDockerContainer(
-	t *testing.T, runOpts *dockertest.RunOptions,
-) (
-	*dockertest.Pool, *dockertest.Resource, func(),
-) {
+func RunTestDockerContainer(t *testing.T, runOpts *dockertest.RunOptions) (*dockertest.Pool, *dockertest.Resource, func()) {
 	t.Helper()
 
 	// rely on "sensible default" that dockertest takes per platform

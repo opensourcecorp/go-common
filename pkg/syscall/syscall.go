@@ -1,9 +1,11 @@
-package osc
+package syscall
 
 import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/opensourcecorp/go-common/pkg/logging"
 )
 
 // Syscall contains data necessary to build, run, and validate external calls.
@@ -27,12 +29,12 @@ func (sc *Syscall) Exec() {
 	} else if len(sc.CmdLine) > 1 {
 		cmd = exec.Command(sc.CmdLine[0], sc.CmdLine[1:]...)
 	} else {
-		FatalLog(nil, "how tf u gonna give me a zero-length command")
+		logging.FatalLog(nil, "how tf u gonna give me a zero-length command")
 	}
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		ErrorLog(err, "Exec() error, output below:\n"+string(output))
+		logging.ErrorLog(err, "Exec() error, output below:\n"+string(output))
 		sc.Ok = false
 		return
 	}
@@ -47,13 +49,13 @@ func (sc *Syscall) Exec() {
 	case "outputGTZero":
 		if len(output) > 0 {
 			if sc.OutputErrorPatternMatch == "" {
-				ErrorLog(nil, "Output below:\n"+string(output))
+				logging.ErrorLog(nil, "Output below:\n"+string(output))
 				sc.Ok = false
 				return
 			} else {
 				regex := regexp.MustCompile(sc.OutputErrorPatternMatch)
 				if regex.MatchString(string(output)) {
-					ErrorLog(nil, "Output below:\n"+string(output))
+					logging.ErrorLog(nil, "Output below:\n"+string(output))
 					sc.Ok = false
 					return
 				}
@@ -61,7 +63,7 @@ func (sc *Syscall) Exec() {
 		}
 	default:
 		// If it was a nonzero exit syscall, they should never get here anyway
-		FatalLog(nil, "Unhandled Syscall.ErrCheckType '%s'", sc.ErrCheckType)
+		logging.FatalLog(nil, "Unhandled Syscall.ErrCheckType '%s'", sc.ErrCheckType)
 	}
 
 	sc.Ok = true
