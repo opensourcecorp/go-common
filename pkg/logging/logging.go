@@ -56,29 +56,29 @@ func SetLoggerPrefixName(name string) {
 
 }
 
-// DebugLog throws debug log messages
-func DebugLog(msg string, values ...any) {
+// Debug prints debug log messages
+func Debug(msg string, values ...any) {
 	if !IsTesting {
 		DebugLogger.Printf(msg+"\n", values...)
 	}
 }
 
-// InfoLog throws info log messages
-func InfoLog(msg string, values ...any) {
+// Info prints info log messages
+func Info(msg string, values ...any) {
 	if !IsTesting {
 		InfoLogger.Printf(msg+"\n", values...)
 	}
 }
 
-// WarnLog throws warning log messages
-func WarnLog(msg string, values ...any) {
+// Warn prints warning log messages
+func Warn(msg string, values ...any) {
 	if !IsTesting {
 		WarnLogger.Printf(msg+"\n", values...)
 	}
 }
 
-// ErrorLog throws error log messages
-func ErrorLog(err error, msg string, values ...any) {
+// Error prints error log messages
+func Error(err error, msg string, values ...any) {
 	if !IsTesting {
 		if err != nil {
 			ErrorLogger.Println(err.Error())
@@ -87,10 +87,10 @@ func ErrorLog(err error, msg string, values ...any) {
 	}
 }
 
-// FatalLog throws fatal log messages, which includes an exit call. There is no
+// Fatal prints fatal log messages, which includes an exit call. There is no
 // check here for if external tests are being run, so that callers can still see
 // fatal log messages.
-func FatalLog(err error, msg string, values ...any) {
+func Fatal(err error, msg string, values ...any) {
 	if err != nil {
 		FatalLogger.Println(err.Error())
 	}

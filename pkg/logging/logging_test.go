@@ -36,35 +36,35 @@ func TestLogging(t *testing.T) {
 	}
 
 	testTable := map[string]testTableItem{
-		"DebugLog": {
+		"Debug": {
 			logger:   DebugLogger,
-			want:     `\[ osc:DEBUG \].* DebugLog`,
+			want:     `\[ osc:DEBUG \].* Debug`,
 			buffer:   debugBuf,
-			funcName: DebugLog,
+			funcName: Debug,
 		},
-		"InfoLog": {
+		"Info": {
 			logger:   InfoLogger,
-			want:     `\[ osc:INFO  \].* InfoLog`,
+			want:     `\[ osc:INFO  \].* Info`,
 			buffer:   infoBuf,
-			funcName: InfoLog,
+			funcName: Info,
 		},
-		"WarnLog": {
+		"Warn": {
 			logger:   WarnLogger,
-			want:     `\[ osc:WARN  \].* WarnLog`,
+			want:     `\[ osc:WARN  \].* Warn`,
 			buffer:   warnBuf,
-			funcName: WarnLog,
+			funcName: Warn,
 		},
-		"ErrorLog": {
+		"Error": {
 			logger:      ErrorLogger,
-			want:        `\[ osc:ERROR \].* ErrorLog`,
+			want:        `\[ osc:ERROR \].* Error`,
 			buffer:      errorBuf,
-			errFuncName: ErrorLog,
+			errFuncName: Error,
 		},
-		"FatalLog": {
+		"Fatal": {
 			logger:      FatalLogger,
-			want:        `\[ osc:FATAL \].* FatalLog`,
+			want:        `\[ osc:FATAL \].* Fatal`,
 			buffer:      fatalBuf,
-			errFuncName: FatalLog,
+			errFuncName: Fatal,
 		},
 	}
 
@@ -73,7 +73,7 @@ func TestLogging(t *testing.T) {
 			// For FatalLog, we actually need to RE-enable the IsTesting var,
 			// because FatalLog will always produce output regardless of testing
 			// status BUT will throw an os.Exit() unless testing is enabled
-			if k == "FatalLog" {
+			if k == "Fatal" {
 				IsTesting = true
 			}
 
@@ -81,7 +81,7 @@ func TestLogging(t *testing.T) {
 			want = v.want
 
 			// Need to dispatch based on signature, since some logs don't share the same
-			if k == "ErrorLog" || k == "FatalLog" {
+			if k == "Error" || k == "Fatal" {
 				v.errFuncName(nil, k)
 			} else {
 				v.funcName(k)
@@ -89,7 +89,7 @@ func TestLogging(t *testing.T) {
 
 			got = v.buffer.String()
 
-			if k == "FatalLog" {
+			if k == "Fatal" {
 				IsTesting = false
 			}
 

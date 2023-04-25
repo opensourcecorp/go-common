@@ -29,12 +29,12 @@ func (sc *Syscall) Exec() {
 	} else if len(sc.CmdLine) > 1 {
 		cmd = exec.Command(sc.CmdLine[0], sc.CmdLine[1:]...)
 	} else {
-		logging.FatalLog(nil, "how tf u gonna give me a zero-length command")
+		logging.Fatal(nil, "how tf u gonna give me a zero-length command")
 	}
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logging.ErrorLog(err, "Exec() error, output below:\n"+string(output))
+		logging.Error(err, "Exec() error, output below:\n"+string(output))
 		sc.Ok = false
 		return
 	}
@@ -49,13 +49,13 @@ func (sc *Syscall) Exec() {
 	case "outputGTZero":
 		if len(output) > 0 {
 			if sc.OutputErrorPatternMatch == "" {
-				logging.ErrorLog(nil, "Output below:\n"+string(output))
+				logging.Error(nil, "Output below:\n"+string(output))
 				sc.Ok = false
 				return
 			} else {
 				regex := regexp.MustCompile(sc.OutputErrorPatternMatch)
 				if regex.MatchString(string(output)) {
-					logging.ErrorLog(nil, "Output below:\n"+string(output))
+					logging.Error(nil, "Output below:\n"+string(output))
 					sc.Ok = false
 					return
 				}
@@ -63,7 +63,7 @@ func (sc *Syscall) Exec() {
 		}
 	default:
 		// If it was a nonzero exit syscall, they should never get here anyway
-		logging.FatalLog(nil, "Unhandled Syscall.ErrCheckType '%s'", sc.ErrCheckType)
+		logging.Fatal(nil, "Unhandled Syscall.ErrCheckType '%s'", sc.ErrCheckType)
 	}
 
 	sc.Ok = true
